@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Yashraj & Vaishnavi — A Netflix Original</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Montserrat:wght@200;300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E50914;--red2:#ff1a1a;--dark:#0a0a0a;--card:#181818;
+  --text:#e5e5e5;--muted:#888;--gold:#f5c518;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Montserrat',sans-serif;color:var(--text);cursor:default}
+
+/* ─── SCREEN SYSTEM ─── */
+.screen{position:fixed;inset:0;display:none;z-index:10}
+.screen.active{display:block}
+#s-intropass.active{display:flex !important;}
+.fade-in{animation:fi .8s ease both}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+
+/* ─── INTRO ─── */
+#s-intro{
+  background:#000;display:none;align-items:center;justify-content:center;
+  cursor:pointer;overflow:hidden;
+}
+#s-intro.active{display:flex;flex-direction:column}
+#s-intro::before{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.5;pointer-events:none;z-index:1;
+}
+.lbox-top,.lbox-bot{position:absolute;left:0;right:0;height:0;background:#000;z-index:5;transition:height 1.2s cubic-bezier(.77,0,.18,1);}
+.lbox-top{top:0}.lbox-bot{bottom:0}
+.letterboxed .lbox-top,.letterboxed .lbox-bot{height:11vh}
+.spotlight{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(229,9,20,.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:spotPulse 3s ease-in-out infinite;pointer-events:none;}
+@keyframes spotPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.8}50%{transform:translate(-50%,-50%) scale(1.2);opacity:.4}}
+.nfx-n{font-family:'Bebas Neue',sans-serif;font-size:min(28vw,300px);color:var(--red);line-height:1;position:relative;z-index:10;opacity:0;transform:scale(.5) rotateY(40deg);animation:nDrop 0.9s cubic-bezier(.22,1,.36,1) 0.4s forwards;filter:drop-shadow(0 0 80px rgba(229,9,20,.9)) drop-shadow(0 20px 60px rgba(0,0,0,.9));user-select:none;}
+@keyframes nDrop{0%{opacity:0;transform:scale(.5) rotateY(40deg)}60%{transform:scale(1.08) rotateY(-3deg)}100%{opacity:1;transform:scale(1) rotateY(0deg)}}
+.sw{position:absolute;width:30vw;height:30vw;max-width:400px;max-height:400px;border-radius:50%;border:3px solid var(--red);opacity:0;z-index:8;pointer-events:none;}
+.sw1{animation:swAnim 1s ease-out 1s forwards}.sw2{animation:swAnim 1s ease-out 1.15s forwards;border-color:#ff6060}.sw3{animation:swAnim 1s ease-out 1.3s forwards;border-color:#ff9090}
+@keyframes swAnim{0%{opacity:.8;transform:scale(.3)}100%{opacity:0;transform:scale(3.5)}}
+.scan{position:absolute;width:100vw;height:4px;background:linear-gradient(90deg,transparent 0%,rgba(229,9,20,.8) 30%,#fff 50%,rgba(229,9,20,.8) 70%,transparent 100%);top:50%;z-index:9;opacity:0;animation:scanLine 0.5s ease-out 0.95s forwards;}
+@keyframes scanLine{0%{opacity:1;transform:scaleX(0) translateY(-50%)}70%{opacity:1;transform:scaleX(1) translateY(-50%)}100%{opacity:0;transform:scaleX(1) translateY(-50%)}}
+.nfx-word{font-family:'Bebas Neue',sans-serif;font-size:min(4vw,44px);letter-spacing:min(2vw,22px);color:#fff;opacity:0;z-index:10;margin-top:-8px;animation:wIn .6s ease 1.6s forwards;}
+@keyframes wIn{to{opacity:.75}}
+.tap-hint{position:absolute;bottom:60px;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);z-index:10;animation:blink 1.5s ease-in-out 2.2s infinite;opacity:0;}
+@keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
+
+/* ─── PROFILES ─── */
+#s-profiles{background:var(--dark);display:none;flex-direction:column;align-items:center;justify-content:center;gap:50px;}
+#s-profiles.active{display:flex}
+#s-profiles::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(229,9,20,.06) 0%,transparent 70%);pointer-events:none;}
+
+/* Animated background stars */
+#s-profiles::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.4) 0%, transparent 0%),
+    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.3) 0%, transparent 0%),
+    radial-gradient(1.5px 1.5px at 50% 70%, rgba(229,9,20,.5) 0%, transparent 0%),
+    radial-gradient(1px 1px at 10% 90%, rgba(255,255,255,.2) 0%, transparent 0%),
+    radial-gradient(1px 1px at 70% 50%, rgba(255,255,255,.3) 0%, transparent 0%);
+  animation:starsTwinkle 4s ease-in-out infinite alternate;
+  pointer-events:none;z-index:0;
+}
+@keyframes starsTwinkle{0%{opacity:.4}100%{opacity:1}}
+
+#s-profiles h1{font-weight:200;font-size:clamp(22px,3vw,36px);letter-spacing:2px;color:#fff;text-align:center;position:relative;z-index:2;}
+
+.profiles-row{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;position:relative;z-index:2;}
+
+.pcard{
+  display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;
+  opacity:0;transform:translateY(40px) scale(.95);animation:pcIn .6s cubic-bezier(.22,1,.36,1) forwards;
+  position:relative;
+}
+.pcard:nth-child(1){animation-delay:.15s}.pcard:nth-child(2){animation-delay:.28s}
+.pcard:nth-child(3){animation-delay:.41s}.pcard:nth-child(4){animation-delay:.54s}
+@keyframes pcIn{to{opacity:1;transform:none}}
+
+/* PIN cards (first 3) get a lock aura */
+.pcard.pin-protected .pavatar::after{
+  content:'🔐';position:absolute;bottom:-8px;right:-8px;
+  font-size:18px;z-index:5;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.8));
+  transition:all .3s;
+}
+.pcard.pin-protected:hover .pavatar::after{
+  content:'✨';transform:scale(1.3);
+}
+
+.pcard:hover .pavatar{border-color:#fff;transform:scale(1.07);box-shadow:0 0 40px rgba(229,9,20,.5),0 0 80px rgba(229,9,20,.2);}
+.pcard:hover .pname{color:#fff}
+
+.pavatar{
+  width:140px;height:140px;border-radius:6px;
+  border:3px solid rgba(255,255,255,.2);transition:all .25s;overflow:visible;
+  position:relative;background:#111;
+}
+.pavatar .pa-inner{width:100%;height:100%;border-radius:4px;overflow:hidden;}
+.pavatar img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.pcard:hover .pavatar img{transform:scale(1.05)}
+.pname{font-size:13px;color:var(--muted);transition:color .2s;letter-spacing:.5px;font-weight:500}
+
+/* Glowing ring on hover */
+.pcard.pin-protected:hover .pavatar{
+  box-shadow:0 0 0 3px rgba(229,9,20,.6),0 0 30px rgba(229,9,20,.4),0 0 60px rgba(229,9,20,.2);
+}
+
+/* ─── PIN OVERLAY ─── */
+#pinOverlay{
+  position:fixed;inset:0;z-index:999;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.92);backdrop-filter:blur(20px);
+}
+#pinOverlay.open{display:flex}
+
+.pin-box{
+  background:#0f0f0f;border:1px solid rgba(229,9,20,.3);border-radius:20px;
+  padding:50px 50px 40px;display:flex;flex-direction:column;align-items:center;gap:28px;
+  max-width:380px;width:90%;
+  box-shadow:0 0 80px rgba(229,9,20,.15),0 40px 80px rgba(0,0,0,.8);
+  animation:pinBoxIn .4s cubic-bezier(.22,1,.36,1) both;
+  position:relative;overflow:hidden;
+}
+.pin-box::before{
+  content:'';position:absolute;top:-1px;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(229,9,20,.8),transparent);
+}
+@keyframes pinBoxIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:none}}
+
+.pin-avatar-row{
+  display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.pin-avatar{
+  width:80px;height:80px;border-radius:8px;overflow:hidden;
+  border:2px solid rgba(229,9,20,.4);
+  box-shadow:0 0 30px rgba(229,9,20,.2);
+}
+.pin-avatar img{width:100%;height:100%;object-fit:cover}
+.pin-for{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;font-weight:600;}
+.pin-name{font-family:'Playfair Display',serif;font-size:22px;color:#fff;font-weight:700}
+
+.pin-subtitle{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:1px;text-align:center;margin-top:-12px;}
+
+/* PIN dots */
+.pin-dots{display:flex;gap:16px;align-items:center;justify-content:center;}
+.pin-dot{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.25);background:transparent;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.pin-dot.filled{background:#fff;border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.6);transform:scale(1.1);}
+.pin-dot.error{background:var(--red);border-color:var(--red);box-shadow:0 0 12px rgba(229,9,20,.8);}
+.pin-dot.success{background:#46d369;border-color:#46d369;box-shadow:0 0 12px rgba(70,211,105,.8);}
+
+/* Shake animation for wrong PIN */
+@keyframes shake{0%,100%{transform:translateX(0)}10%,50%,90%{transform:translateX(-8px)}30%,70%{transform:translateX(8px)}}
+.pin-dots.shake{animation:shake .4s ease}
+
+/* Numpad */
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;}
+.num-btn{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;padding:18px 10px;color:#fff;font-size:20px;font-weight:600;
+  cursor:pointer;font-family:'Montserrat',sans-serif;
+  transition:all .15s;letter-spacing:.5px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.num-btn:hover{background:rgba(255,255,255,.14);transform:scale(1.05);border-color:rgba(255,255,255,.2);}
+.num-btn:active{transform:scale(.95);background:rgba(255,255,255,.2);}
+.num-btn.del-btn{font-size:22px;background:rgba(229,9,20,.1);border-color:rgba(229,9,20,.2);color:var(--red)}
+.num-btn.del-btn:hover{background:rgba(229,9,20,.2)}
+.num-btn .num-letters{font-size:8px;color:rgba(255,255,255,.3);letter-spacing:2px;font-weight:500;}
+
+.pin-error-msg{
+  font-size:12px;color:var(--red);letter-spacing:1px;text-align:center;
+  opacity:0;transition:opacity .2s;min-height:18px;font-weight:600;
+}
+.pin-error-msg.show{opacity:1}
+
+.pin-cancel{
+  font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:1px;
+  padding:8px 20px;border-radius:6px;transition:color .2s;
+  text-transform:uppercase;font-weight:600;
+  border:1px solid rgba(255,255,255,.08);
+  width:100%;text-align:center;
+}
+.pin-cancel:hover{color:#fff;border-color:rgba(255,255,255,.2);}
+
+/* ─── HOME SCREEN ─── */
+#s-home{display:none;overflow-y:auto;overflow-x:hidden;background:var(--dark);scroll-behavior:smooth;}
+#s-home.active{display:block}
+#s-home::-webkit-scrollbar{width:4px}
+#s-home::-webkit-scrollbar-track{background:transparent}
+#s-home::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+.nf-nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;gap:36px;padding:16px 52px;
+  background:linear-gradient(180deg,rgba(0,0,0,.95) 0%,transparent 100%);
+  transition:background .4s,backdrop-filter .4s;
+}
+.nf-nav.scrolled{background:rgba(10,10,10,.97);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.04);}
+.nf-logo{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--red);letter-spacing:-1px;text-shadow:0 0 40px rgba(229,9,20,.6);cursor:pointer;flex-shrink:0;}
+.nf-links{display:flex;gap:22px;list-style:none}
+.nf-links li{font-size:13px;color:var(--text);cursor:pointer;opacity:.7;transition:opacity .2s,color .2s;font-weight:500}
+.nf-links li:hover{opacity:1;color:#fff}
+.nf-links li.active-link{opacity:1;color:#fff;font-weight:700}
+.nf-right{margin-left:auto;display:flex;align-items:center;gap:20px}
+.nf-bell{font-size:18px;cursor:pointer;opacity:.8;transition:opacity .2s}
+.nf-bell:hover{opacity:1}
+.nf-avatar{width:32px;height:32px;border-radius:4px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .2s;}
+.nf-avatar:hover{border-color:#fff}
+.nf-avatar img{width:100%;height:100%;object-fit:cover}
+
+/* ─── HERO ─── */
+.hero{width:100%;height:100vh;position:relative;display:flex;align-items:center;padding:0 52px;flex-shrink:0;overflow:hidden;}
+.hero-bg-slider{position:absolute;inset:0;z-index:0;}
+.hero-bg-slide{position:absolute;inset:0;opacity:0;transition:opacity 1.5s ease;}
+.hero-bg-slide.active{opacity:1}
+.hero-bg-slide img{width:100%;height:100%;object-fit:cover;filter:brightness(.45);}
+.hero-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(to right,rgba(10,10,10,.98) 0%,rgba(10,10,10,.7) 40%,rgba(10,10,10,.1) 75%,transparent 100%),linear-gradient(to top,rgba(10,10,10,1) 0%,rgba(10,10,10,.6) 20%,transparent 50%);}
+.particles{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+.particle{position:absolute;width:2px;height:2px;border-radius:50%;background:rgba(229,9,20,.6);animation:pfloat linear infinite;}
+@keyframes pfloat{0%{transform:translateY(100vh) translateX(0);opacity:0}10%{opacity:1}90%{opacity:.5}100%{transform:translateY(-10vh) translateX(var(--dx,20px));opacity:0}}
+.hero-content{position:relative;z-index:10;max-width:580px;margin-top:60px;animation:hcIn 1s ease .3s both;}
+@keyframes hcIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:3px;padding:5px 16px;border-radius:3px;margin-bottom:20px;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,5.5vw,78px);line-height:1;color:#fff;text-shadow:0 4px 40px rgba(0,0,0,.9);margin-bottom:16px;}
+.hero-title .amp{color:var(--red);font-style:italic;display:inline-block;font-size:.7em;text-shadow:0 0 60px rgba(229,9,20,.8);}
+.hero-tagline{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(13px,1.5vw,17px);color:rgba(255,255,255,.7);letter-spacing:.5px;margin-bottom:18px;line-height:1.5;}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.match-badge{color:#46d369;font-weight:800;font-size:15px;letter-spacing:.5px;}
+.year-badge,.rating-badge,.genre-badge{font-size:12px;color:var(--muted);font-weight:500;}
+.rating-badge{border:1px solid var(--muted);padding:2px 8px;border-radius:2px}
+.top10{display:flex;align-items:center;gap:6px;background:rgba(229,9,20,.15);border:1px solid rgba(229,9,20,.3);padding:3px 10px;border-radius:3px;font-size:11px;font-weight:700;color:#ff6060;letter-spacing:1px;}
+.hero-desc{font-size:14px;line-height:1.8;color:rgba(255,255,255,.7);margin-bottom:28px;font-weight:300;max-width:480px;}
+.hero-btns{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.btn-play{display:flex;align-items:center;gap:10px;background:#fff;color:#000;font-weight:800;font-size:16px;padding:13px 36px;border-radius:4px;border:none;cursor:pointer;transition:background .2s,transform .15s;font-family:'Montserrat',sans-serif;letter-spacing:.3px;}
+.btn-play:hover{background:rgba(255,255,255,.85);transform:scale(1.02)}
+.btn-play:active{transform:scale(.98)}
+.btn-more{display:flex;align-items:center;gap:10px;background:rgba(109,109,110,.55);color:#fff;font-weight:600;font-size:15px;padding:13px 32px;border-radius:4px;border:none;cursor:pointer;transition:background .2s,transform .15s;font-family:'Montserrat',sans-serif;backdrop-filter:blur(5px);}
+.btn-more:hover{background:rgba(109,109,110,.8);transform:scale(1.02)}
+.maturity-bar{position:absolute;right:0;bottom:120px;z-index:10;display:flex;align-items:center;}
+.mat-rating{border:2px solid rgba(255,255,255,.4);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;padding:5px 14px;letter-spacing:1px;}
+
+/* ─── ROWS ─── */
+.section-anchor{display:block;height:80px;margin-top:-80px;visibility:hidden;pointer-events:none;}
+.rows{padding:0 52px 120px;margin-top:-6vh;position:relative;z-index:20;}
+.row{margin-bottom:48px}
+.row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.row-title{font-size:18px;font-weight:700;color:#e5e5e5;letter-spacing:.3px;}
+.row-explore{font-size:12px;font-weight:600;color:#54b3d6;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;opacity:0;transition:opacity .2s;}
+.row:hover .row-explore{opacity:1}
+.row-cards{display:flex;gap:7px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none;position:relative;}
+.row-cards::-webkit-scrollbar{display:none}
+.mcard{flex:0 0 195px;height:112px;border-radius:5px;overflow:hidden;cursor:pointer;position:relative;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s,z-index 0s .25s;background:#111;}
+.mcard:hover{transform:scale(1.12);box-shadow:0 12px 45px rgba(0,0,0,.85);z-index:20;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s,z-index 0s 0s;}
+.mcard img{width:100%;height:100%;object-fit:cover;transition:filter .25s;}
+.mcard:hover img{filter:brightness(1.1)}
+.mcard-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 50%);opacity:0;transition:opacity .25s;}
+.mcard:hover .mcard-overlay{opacity:1}
+.mcard-info{position:absolute;bottom:0;left:0;right:0;padding:18px 10px 9px;transform:translateY(5px);transition:transform .25s;opacity:0;}
+.mcard:hover .mcard-info{opacity:1;transform:translateY(0)}
+.mcard-lbl{font-size:11px;font-weight:700;color:#fff;letter-spacing:.3px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mcard-sub{font-size:9px;color:#46d369;font-weight:600;margin-top:2px}
+.mcard-actions{display:flex;gap:6px;align-items:center;margin-top:6px;opacity:0;transition:opacity .25s .05s;}
+.mcard:hover .mcard-actions{opacity:1}
+.mac-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;transition:border-color .15s,background .15s;}
+.mac-btn:hover{border-color:#fff;background:rgba(255,255,255,.2)}
+
+/* ─── SPOTLIGHT ─── */
+.spotlight-row{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:200px 200px;gap:7px;margin-bottom:48px;border-radius:6px;overflow:hidden;}
+.sg-cell{position:relative;overflow:hidden;cursor:pointer;transition:transform .3s,z-index 0s .3s;background:#111;}
+.sg-cell:hover{transform:scale(1.02);z-index:5;transition:transform .3s,z-index 0s}
+.sg-cell img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s}
+.sg-cell:hover img{filter:brightness(1.15)}
+.sg-main{grid-row:1/3}
+.sg-label{position:absolute;bottom:12px;left:12px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.6);padding:4px 8px;border-radius:3px;letter-spacing:.5px;opacity:0;transition:opacity .2s;}
+.sg-cell:hover .sg-label{opacity:1}
+
+/* ─── WATCHLIST ─── */
+.watchlist-section{padding:40px 52px;background:linear-gradient(135deg,rgba(229,9,20,.05) 0%,transparent 60%);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:48px;}
+.watchlist-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-top:20px;}
+.wl-card{background:#181818;border-radius:8px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;border:1px solid rgba(255,255,255,.06);}
+.wl-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.6)}
+.wl-img{width:100%;height:130px;object-fit:cover;display:block;filter:brightness(.85)}
+.wl-body{padding:14px}
+.wl-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px}
+.wl-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.wl-tag{display:inline-block;margin-top:8px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);border:1px solid rgba(229,9,20,.3);padding:2px 8px;border-radius:2px;}
+
+/* ─── CHAPTERS ─── */
+.chapters-section{padding:40px 52px 60px;}
+.chapters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:20px;}
+.ch-card{background:#141414;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:transform .3s,box-shadow .3s,border-color .3s;position:relative;}
+.ch-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.7);border-color:rgba(229,9,20,.3)}
+.ch-img{width:100%;height:170px;object-fit:cover;display:block;filter:brightness(.75)}
+.ch-body{padding:18px}
+.ch-number{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:var(--red);margin-bottom:8px;}
+.ch-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;line-height:1.3}
+.ch-desc{font-size:12px;color:var(--muted);line-height:1.7}
+.ch-badge{position:absolute;top:14px;right:14px;background:rgba(229,9,20,.9);color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:3px;}
+
+/* ─── CREDITS ─── */
+#s-credits{background:#000;display:none;overflow:hidden;}
+#s-credits.active{display:flex;flex-direction:column;align-items:center}
+.credits-photo-bg{position:fixed;inset:0;z-index:0;overflow:hidden;}
+.credits-photo-bg img{width:100%;height:100%;object-fit:cover;filter:blur(30px) brightness(.15);transform:scale(1.1);}
+.credits-scroll{position:relative;z-index:10;width:100%;display:flex;flex-direction:column;align-items:center;padding:100vh 50px 80px;max-width:780px;}
+.credits-inner{width:100%;animation:credRoll 45s linear forwards;}
+@keyframes credRoll{from{transform:translateY(0)}to{transform:translateY(-85%)}}
+.cr-logo{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:4px;color:var(--red);text-align:center;margin-bottom:20px;opacity:.7;}
+.cr-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,6vw,80px);color:#fff;text-align:center;letter-spacing:3px;line-height:1;margin-bottom:4px;}
+.cr-title .amp{color:var(--red)}
+.cr-sub{font-size:12px;color:var(--muted);text-align:center;letter-spacing:5px;text-transform:uppercase;margin-bottom:70px;font-family:'Playfair Display',serif;font-style:italic;}
+.film-strip{width:100%;display:flex;gap:4px;margin-bottom:70px;overflow:hidden;border-radius:4px;}
+.film-frame{flex:1;aspect-ratio:1;overflow:hidden;background:#111;border:2px solid #222;border-radius:2px;}
+.film-frame img{width:100%;height:100%;object-fit:cover;opacity:.85}
+.cr-section{width:100%;border-top:1px solid rgba(255,255,255,.06);padding-top:40px;margin-bottom:40px;}
+.cr-section-title{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--red);text-align:center;margin-bottom:24px;font-weight:600;}
+.cr-line{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:20px;}
+.cr-role{font-size:10px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;flex:0 0 200px}
+.cr-name{font-size:14px;color:#fff;font-weight:500;text-align:right}
+.cr-love{text-align:center;padding:70px 30px 50px;border-top:1px solid rgba(229,9,20,.2);margin-top:40px;}
+.cr-love-for{font-size:10px;color:var(--muted);letter-spacing:5px;text-transform:uppercase;margin-bottom:18px;font-weight:600;}
+.cr-love-name{font-family:'Playfair Display',serif;font-size:clamp(40px,6vw,72px);color:#fff;font-weight:700;margin-bottom:8px;line-height:1;}
+.cr-love-name span{color:var(--red)}
+.cr-love-note{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(14px,1.8vw,19px);color:rgba(255,255,255,.65);line-height:1.9;margin-top:26px;max-width:480px;margin-left:auto;margin-right:auto;}
+.cr-love-sig{display:block;margin-top:20px;color:var(--red);font-style:normal;font-weight:700;font-size:15px;letter-spacing:2px;}
+.cr-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:50px 0;border-radius:6px;overflow:hidden;}
+.cr-mosaic img{width:100%;aspect-ratio:1;object-fit:cover;opacity:.8;transition:opacity .3s}
+.cr-mosaic img:hover{opacity:1}
+.hb{font-size:60px;display:block;text-align:center;margin-top:30px;animation:hbeat 1.1s ease-in-out infinite;}
+@keyframes hbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.15)}}
+.back-home{position:fixed;bottom:28px;right:28px;z-index:999;background:rgba(229,9,20,.85);color:#fff;border:none;padding:12px 26px;border-radius:4px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;transition:background .2s,transform .15s;box-shadow:0 4px 20px rgba(229,9,20,.3);}
+.back-home:hover{background:var(--red);transform:translateY(-1px)}
+
+/* ─── MODAL ─── */
+.modal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;}
+.modal.open{display:flex}
+.modal-inner{background:#141414;border-radius:10px;max-width:860px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-inner::-webkit-scrollbar{width:3px}
+.modal-inner::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+.modal-img{width:100%;height:360px;object-fit:cover;border-radius:10px 10px 0 0;filter:brightness(.8);}
+.modal-close{position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(42,42,42,.9);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:10;}
+.modal-close:hover{background:#444}
+.modal-body{padding:28px 36px 36px}
+.modal-badge{display:inline-flex;align-items:center;gap:7px;background:var(--red);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;padding:4px 12px;border-radius:3px;margin-bottom:14px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:44px;color:#fff;line-height:1;margin-bottom:12px;}
+.modal-title span{color:var(--red)}
+.modal-meta{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.modal-match{color:#46d369;font-weight:800;font-size:14px}
+.modal-desc{font-size:14px;line-height:1.8;color:#ccc;font-weight:300;margin-bottom:24px}
+.modal-btns{display:flex;gap:12px;flex-wrap:wrap}
+.mbtn-play{display:flex;align-items:center;gap:8px;background:#fff;color:#000;font-weight:800;font-size:14px;padding:11px 28px;border-radius:4px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;transition:background .2s;}
+.mbtn-play:hover{background:rgba(255,255,255,.85)}
+.mbtn-list{display:flex;align-items:center;gap:8px;background:rgba(109,109,110,.55);color:#fff;font-weight:600;font-size:14px;padding:11px 24px;border-radius:4px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;transition:background .2s;}
+.mbtn-list:hover{background:rgba(109,109,110,.8)}
+
+/* ─── GALLERY ─── */
+.photo-gallery{padding:0 52px 60px;position:relative;z-index:20}
+.gallery-title{font-size:18px;font-weight:700;margin-bottom:14px;color:#e5e5e5}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;}
+.gallery-item{aspect-ratio:1;overflow:hidden;border-radius:4px;cursor:pointer;background:#111;transition:transform .25s;position:relative;}
+.gallery-item:hover{transform:scale(1.04);z-index:5}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s}
+.gallery-item:hover img{filter:brightness(1.15)}
+
+/* ─── LIGHTBOX ─── */
+.lightbox{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;object-fit:contain;border-radius:6px;box-shadow:0 20px 80px rgba(0,0,0,.9);}
+.lb-close{position:absolute;top:20px;right:20px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.lb-close:hover{background:rgba(255,255,255,.2)}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.lb-prev{left:20px}.lb-next{right:20px}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,.2)}
+
+/* ─── MY GIRL SECTION ─── */
+.mygirl-section{padding:40px 52px;border-top:1px solid rgba(255,255,255,.05);}
+.exclusive-tag{font-size:11px;color:var(--red);font-weight:700;letter-spacing:2px;border:1px solid rgba(229,9,20,.4);padding:3px 10px;border-radius:3px;}
+.video-wrapper{position:relative;width:100%;max-width:900px;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(229,9,20,.2);border:1px solid rgba(229,9,20,.2);background:#111;}
+
+/* ─── SUCCESS SCREEN (after correct PIN) ─── */
+#pinSuccess{
+  position:fixed;inset:0;z-index:1000;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.98);backdrop-filter:blur(20px);
+  flex-direction:column;gap:20px;
+}
+#pinSuccess.open{display:flex;animation:successFade .4s ease}
+@keyframes successFade{from{opacity:0}to{opacity:1}}
+.success-heart{font-size:80px;animation:hbeat 1s ease infinite;}
+.success-msg{font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,32px);color:#fff;text-align:center;line-height:1.6;}
+.success-msg span{color:var(--red)}
+.success-sub{font-size:13px;color:var(--muted);letter-spacing:2px;text-align:center}
+.success-continue{
+  background:var(--red);color:#fff;border:none;padding:16px 44px;border-radius:6px;
+  font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;letter-spacing:1.5px;
+  cursor:pointer;margin-top:12px;text-transform:uppercase;
+  transition:transform .15s,box-shadow .2s;
+  box-shadow:0 8px 30px rgba(229,9,20,.4);
+}
+.success-continue:hover{transform:scale(1.04);box-shadow:0 12px 40px rgba(229,9,20,.6);}
+
+/* ─── SHAYARI SECTION ─── */
+.sh-section-block{max-width:1200px;margin:0 auto 70px;}
+.sh-section-label{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,2.5vw,28px);
+  letter-spacing:3px;color:#e5e5e5;margin-bottom:28px;
+  padding-bottom:14px;border-bottom:1px solid rgba(229,9,20,.2);
+  display:flex;align-items:center;gap:12px;
+}
+.sh-section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(229,9,20,.3),transparent);}
+
+.sh-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.sh-grid-single{grid-template-columns:1fr;}
+
+.sh-card{
+  background:linear-gradient(145deg,rgba(22,5,12,.98),rgba(12,3,18,.99));
+  border:1px solid rgba(229,9,20,.12);border-radius:18px;
+  padding:30px 26px 22px;position:relative;overflow:hidden;
+  transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s,border-color .35s;
+}
+.sh-card::before{
+  content:'';position:absolute;top:0;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(229,9,20,.5),transparent);
+  opacity:0;transition:opacity .35s;
+}
+.sh-card::after{
+  content:'';position:absolute;inset:0;border-radius:18px;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(229,9,20,.04),transparent);
+  pointer-events:none;
+}
+.sh-card:hover{
+  transform:translateY(-8px) scale(1.01);
+  box-shadow:0 24px 60px rgba(229,9,20,.14),0 8px 24px rgba(0,0,0,.7);
+  border-color:rgba(229,9,20,.32);
+}
+.sh-card:hover::before{opacity:1}
+
+.sh-tulip{
+  position:absolute;top:14px;right:16px;font-size:20px;
+  opacity:.4;transition:all .3s;
+}
+.sh-card:hover .sh-tulip{opacity:1;transform:scale(1.25) rotate(15deg);}
+
+.sh-text{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(13.5px,1.2vw,15.5px);
+  color:rgba(255,255,255,.78);
+  line-height:2.1;font-weight:400;
+  white-space:pre-line;
+  margin-bottom:22px;
+  letter-spacing:.2px;
+}
+.sh-card-wide .sh-text{font-size:clamp(14px,1.3vw,16px);line-height:2.2;}
+
+.sh-sig{
+  display:flex;justify-content:flex-end;align-items:center;gap:10px;
+  border-top:1px solid rgba(229,9,20,.08);padding-top:14px;
+  font-size:10.5px;color:rgba(229,9,20,.65);
+  font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;
+}
+.sh-sig::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(229,9,20,.15));}
+
+/* Tulip rain */
+@keyframes tulipFall{
+  0%{transform:translateY(-60px) rotate(0deg);opacity:0}
+  8%{opacity:1}
+  88%{opacity:.8}
+  100%{transform:translateY(105vh) rotate(400deg);opacity:0}
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .nf-nav{padding:14px 20px;gap:18px}
+  .nf-links{display:none}
+  .hero{padding:0 20px;align-items:flex-end;padding-bottom:120px}
+  .rows{padding:0 12px 100px}
+  .spotlight-row{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .sg-main{grid-row:auto;grid-column:1/3}
+  .photo-gallery{padding:0 12px 60px}
+  .credits-scroll{padding:80vh 20px 60px}
+  .cr-role{flex:0 0 140px;font-size:9px}
+  .watchlist-section,.chapters-section,.mygirl-section{padding:30px 12px}
+  .pin-box{padding:36px 24px 28px}
+  .numpad{gap:8px}
+  .num-btn{padding:14px 8px;font-size:18px}
+  #sec-shayari > div{padding:40px 16px 60px !important}
+  .sh-grid{grid-template-columns:1fr !important;}
+  .sh-section-label{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ SCREEN 0: INTRO ══════════════════════ -->
+<div id="s-intro" class="screen active" onclick="showIntroPass()">
+  <div class="spotlight"></div>
+  <div class="lbox-top"></div>
+  <div class="lbox-bot"></div>
+  <div class="sw sw1"></div>
+  <div class="sw sw2"></div>
+  <div class="sw sw3"></div>
+  <div class="scan"></div>
+  <div class="nfx-n">N</div>
+  <div class="nfx-word">NETFLIX</div>
+  <p class="tap-hint">Click anywhere to continue</p>
+</div>
+
+<!-- ══════════════════════ SCREEN 0.5: INTRO PASSWORD ══════════════════════ -->
+<div id="s-intropass" class="screen" style="
+  background:#000;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+">
+  <!-- bg glow -->
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(229,9,20,.08),transparent);pointer-events:none;"></div>
+
+  <!-- Netflix logo small -->
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,44px);color:var(--red);letter-spacing:-1px;text-shadow:0 0 30px rgba(229,9,20,.5);margin-bottom:48px;position:relative;z-index:2;">NETFLIX</div>
+
+  <!-- Lock icon -->
+  <div style="font-size:44px;margin-bottom:20px;position:relative;z-index:2;animation:hbeat 2s ease-in-out infinite;">🔐</div>
+
+  <!-- Hint text -->
+  <div style="position:relative;z-index:2;text-align:center;margin-bottom:32px;">
+    <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(16px,2vw,22px);color:rgba(255,255,255,.75);letter-spacing:.5px;line-height:1.7;">
+      Jis naam se hume<br>mohabbat hai...
+    </div>
+    <div style="font-size:11px;color:rgba(229,9,20,.6);letter-spacing:3px;text-transform:uppercase;margin-top:10px;font-weight:600;">woh naam yahan daalo 🌷</div>
+  </div>
+
+  <!-- Input -->
+  <div style="position:relative;z-index:2;width:min(320px,80vw);">
+    <input id="introPassInput"
+      type="text"
+      placeholder="..."
+      autocomplete="off" autocorrect="off" spellcheck="false"
+      style="
+        width:100%;
+        padding:16px 50px 16px 24px;
+        background:rgba(255,255,255,.05);
+        border:1px solid rgba(229,9,20,.3);
+        border-radius:12px;
+        color:#fff;
+        font-family:'Playfair Display',serif;
+        font-size:18px;
+        font-style:italic;
+        letter-spacing:3px;
+        text-align:center;
+        outline:none;
+        transition:border-color .25s,box-shadow .25s;
+      "
+      oninput="checkIntroPass(this.value)"
+      onfocus="this.style.borderColor='rgba(229,9,20,.7)';this.style.boxShadow='0 0 30px rgba(229,9,20,.12)'"
+      onblur="this.style.borderColor='rgba(229,9,20,.3)';this.style.boxShadow='none'"
+    />
+    <span id="introPassIcon" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:20px;pointer-events:none;transition:all .2s;">🌷</span>
+  </div>
+
+  <!-- Error msg -->
+  <div id="introPassErr" style="
+    margin-top:14px;font-size:12px;color:rgba(229,9,20,.8);
+    letter-spacing:1px;opacity:0;transition:opacity .25s;
+    font-weight:600;position:relative;z-index:2;text-align:center;
+  ">Galat naam hai... dil se socho 💔</div>
+
+</div>
+
+<!-- ══════════════════════ SCREEN 1: PROFILES ══════════════════════ -->
+<div id="s-profiles" class="screen">
+  <h1>Who's Watching?</h1>
+  <div class="profiles-row">
+
+    <!-- Yashraj — PIN protected -->
+    <div class="pcard pin-protected" onclick="openPin('yashraj')">
+      <div class="pavatar">
+        <div class="pa-inner">
+          <img src="https://lh3.googleusercontent.com/d/19NGH51y5kH13WmtphMrAnlGAbzi0K1Qv" alt="Y" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#b91c1c,#7c3aed);align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:52px;color:rgba(255,255,255,.9)">Y</div>
+        </div>
+      </div>
+      <span class="pname">Yashraj 💛</span>
+    </div>
+
+    <!-- Vaishnavi — PIN protected -->
+    <div class="pcard pin-protected" onclick="openPin('vaishnavi')">
+      <div class="pavatar">
+        <div class="pa-inner">
+          <img src="https://lh3.googleusercontent.com/d/1VwAzo-IjKJfwKEc12jjW14LzakHNQaA-" alt="V" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#d97706,#dc2626);align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:52px;color:rgba(255,255,255,.9)">V</div>
+        </div>
+      </div>
+      <span class="pname">Vaishnavi ❤️</span>
+    </div>
+
+    <!-- Together — PIN protected -->
+    <div class="pcard pin-protected" onclick="openPin('together')">
+      <div class="pavatar">
+        <div class="pa-inner">
+          <img src="https://lh3.googleusercontent.com/d/1G0QWxuGL8v7eh9Lf6tKRYEgvKfDc6adM" alt="Together" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#1d4ed8,#06b6d4);align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:52px;color:rgba(255,255,255,.9)">Y+V</div>
+        </div>
+      </div>
+      <span class="pname">Together 🌙</span>
+    </div>
+
+    <!-- Forever — PIN protected -->
+    <div class="pcard pin-protected" onclick="openPin('forever')">
+      <div class="pavatar">
+        <div class="pa-inner">
+          <img src="https://lh3.googleusercontent.com/d/1aXTgJSilnJ7xr6giCfkWkx53c0nTBx9L" alt="Forever" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#059669,#10b981);align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:52px;color:rgba(255,255,255,.9)">∞</div>
+        </div>
+      </div>
+      <span class="pname">Forever & More 💚</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ PIN OVERLAY ══════════════════════ -->
+<div id="pinOverlay">
+  <div class="pin-box" id="pinBox">
+    <div class="pin-avatar-row">
+      <div class="pin-avatar">
+        <img id="pinAvatarImg" src="" alt=""/>
+      </div>
+      <div class="pin-for">Enter PIN for</div>
+      <div class="pin-name" id="pinNameLabel">Yashraj</div>
+    </div>
+    <div class="pin-subtitle">Secret access • Only you know 🔐</div>
+
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="dot0"></div>
+      <div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div>
+      <div class="pin-dot" id="dot3"></div>
+    </div>
+
+    <div class="numpad">
+      <button class="num-btn" onclick="pinPress('1')">1<span class="num-letters"></span></button>
+      <button class="num-btn" onclick="pinPress('2')">2<span class="num-letters">ABC</span></button>
+      <button class="num-btn" onclick="pinPress('3')">3<span class="num-letters">DEF</span></button>
+      <button class="num-btn" onclick="pinPress('4')">4<span class="num-letters">GHI</span></button>
+      <button class="num-btn" onclick="pinPress('5')">5<span class="num-letters">JKL</span></button>
+      <button class="num-btn" onclick="pinPress('6')">6<span class="num-letters">MNO</span></button>
+      <button class="num-btn" onclick="pinPress('7')">7<span class="num-letters">PQRS</span></button>
+      <button class="num-btn" onclick="pinPress('8')">8<span class="num-letters">TUV</span></button>
+      <button class="num-btn" onclick="pinPress('9')">9<span class="num-letters">WXYZ</span></button>
+      <button class="num-btn" style="visibility:hidden"></button>
+      <button class="num-btn" onclick="pinPress('0')">0</button>
+      <button class="num-btn del-btn" onclick="pinDelete()">⌫</button>
+    </div>
+
+    <div class="pin-error-msg" id="pinError">Wrong PIN. Try again 💔</div>
+    <div class="pin-cancel" onclick="closePin()">Cancel</div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PIN SUCCESS SCREEN ══════════════════════ -->
+<div id="pinSuccess">
+  <div class="success-heart">❤️</div>
+  <div class="success-msg">Welcome, <span id="successName">Yashraj</span>!<br>This is made just for you 🌹</div>
+  <div class="success-sub">YOUR WORLD • YOUR STORY • YOUR LOVE</div>
+  <button class="success-continue" onclick="proceedToHome()">Enter Our World →</button>
+</div>
+
+<!-- ══════════════════════ SCREEN 2: HOME ══════════════════════ -->
+<div id="s-home" class="screen">
+
+  <nav class="nf-nav" id="nfNav">
+    <div class="nf-logo" onclick="navScrollTo('sec-home')">NETFLIX</div>
+    <ul class="nf-links">
+      <li onclick="navScrollTo('sec-home')" id="nl-home" class="active-link">Home</li>
+      <li onclick="navScrollTo('sec-story')" id="nl-story">Our Story</li>
+      <li onclick="navScrollTo('sec-memories')" id="nl-memories">Memories</li>
+      <li onclick="navScrollTo('sec-watchlist')" id="nl-watchlist">Watchlist</li>
+      <li onclick="navScrollTo('sec-chapters')" id="nl-chapters">New Chapters</li>
+      <li onclick="navScrollTo('sec-mygirl')" id="nl-mygirl">My Girl 💕</li>
+      <li onclick="navScrollTo('sec-shayari')" id="nl-shayari">Shayari 🌷</li>
+    </ul>
+    <div class="nf-right">
+      <span class="nf-bell">🔔</span>
+      <div class="nf-avatar">
+        <img src="https://lh3.googleusercontent.com/d/1G0QWxuGL8v7eh9Lf6tKRYEgvKfDc6adM" onerror="this.parentElement.style.background='#c00';this.remove()"/>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div id="sec-home" style="position:relative">
+    <span class="section-anchor" id="anchor-home"></span>
+    <div class="hero">
+      <div class="hero-bg-slider" id="heroSlider">
+        <div class="hero-bg-slide active"><img src="https://lh3.googleusercontent.com/d/1M0-ZWy4l3rOE6-rKsma_-5yzlsoNpNBg" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#2d0505,#0a1225)'"/></div>
+        <div class="hero-bg-slide"><img src="https://lh3.googleusercontent.com/d/1CBijpe4rrOoW9cSO4sPbH_cumrNRRXso" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#1a0a2e,#0a1225)'"/></div>
+        <div class="hero-bg-slide"><img src="https://lh3.googleusercontent.com/d/1RzRUPhyaNKoILulJ2JZxLXa8Mk8hWI5z" alt="" onerror="this.parentElement.style.background='linear-gradient(135deg,#2d0a0a,#0a0a1c)'"/></div>
+      </div>
+      <div class="hero-overlay"></div>
+      <div class="particles" id="particles"></div>
+      <div class="hero-content">
+        <div class="hero-badge">🎬 NETFLIX ORIGINAL</div>
+        <h1 class="hero-title">YASHRAJ 🦢<br><span class="amp">&</span><br>VAISHNAVI 🦢</h1>
+        <p class="hero-tagline">Two souls. One story. Infinite chapters.</p>
+        <div class="hero-meta">
+          <span class="match-badge">💯% Match</span>
+          <span class="year-badge">2025</span>
+          <span class="rating-badge">U/A</span>
+          <span class="genre-badge">Romantic Drama</span>
+          <span class="top10">🔥 TOP STORY</span>
+        </div>
+        <p class="hero-desc">
+          Two souls collided by chance, held together by choice.<br>
+          Written in late-night texts, stolen glances, and every single moment that made time stand still.<br>
+          <em>This is not just a love story — this is <strong>their</strong> story.</em>
+        </p>
+        <div class="hero-btns">
+          <button class="btn-play" onclick="goCredits()">▶ &nbsp;Play Our Story</button>
+          <button class="btn-more" onclick="openModal()">ⓘ &nbsp;More Info</button>
+        </div>
+      </div>
+      <div class="maturity-bar"><div class="mat-rating">U/A 13+</div></div>
+    </div>
+  </div>
+
+  <br><br><br><br><br>
+
+  <!-- FEATURED -->
+  <div id="sec-story" style="position:relative">
+    <div class="rows" style="padding-bottom:0">
+      <div style="margin-bottom:10px">
+        <div class="row-title" style="margin-bottom:14px">✨ Featured Moments</div>
+        <div class="spotlight-row">
+          <div class="sg-cell sg-main">
+            <img src="https://lh3.googleusercontent.com/d/1Mh7AdIxK0_s-vnyJqoJwIusszaNI6tZw" alt="" onerror="this.style.background='#1a0a2e'"/>
+            <span class="sg-label">💑 Us Together</span>
+          </div>
+          <div class="sg-cell"><img src="https://lh3.googleusercontent.com/d/1MvBpTqGA-ypz-jL5olEGWS-oGc-jOyxM" alt="" onerror="this.style.background='#2d0505'"/><span class="sg-label">✨ Memories</span></div>
+          <div class="sg-cell"><img src="https://lh3.googleusercontent.com/d/1Bnm2Wflu5AA6CLCQYTrYYUGFKroBk88V" alt="" onerror="this.style.background='#0a1225'"/><span class="sg-label">🌙 Night Out</span></div>
+          <div class="sg-cell"><img src="https://lh3.googleusercontent.com/d/1sHvaHArBsqqI5u8AdjcTecZUpBhBCI4Z" alt="" onerror="this.style.background='#1a1a2e'"/><span class="sg-label">😊 Smiles</span></div>
+          <div class="sg-cell"><img src="https://lh3.googleusercontent.com/d/1jQQudK8L9530U_H8-8JSsiAT16gVeXTF" alt="" onerror="this.style.background='#2e1a0a'"/><span class="sg-label">🎉 Special Day</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMORIES -->
+  <div id="sec-memories" style="position:relative">
+    <div class="rows" style="padding-top:20px;padding-bottom:20px">
+      <div class="row">
+        <div class="row-header"><div class="row-title">🎞️ Most Rewatched Memories</div><span class="row-explore">Explore All ›</span></div>
+        <div class="row-cards" id="row1"></div>
+      </div>
+      <div class="row">
+        <div class="row-header"><div class="row-title">⭐ Critically Acclaimed Date Nights</div><span class="row-explore">Explore All ›</span></div>
+        <div class="row-cards" id="row2"></div>
+      </div>
+      <div class="row">
+        <div class="row-header"><div class="row-title">😂 Moments We Still Laugh About</div><span class="row-explore">Explore All ›</span></div>
+        <div class="row-cards" id="row3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WATCHLIST -->
+  <div id="sec-watchlist" style="position:relative">
+    <div class="watchlist-section">
+      <div class="row-title">📋 Our Watchlist — Dreams & Plans</div>
+      <div class="watchlist-grid" id="watchlistGrid"></div>
+    </div>
+  </div>
+
+  <!-- NEW CHAPTERS -->
+  <div id="sec-chapters" style="position:relative">
+    <div class="chapters-section">
+      <div class="row-title">✈️ New Chapters — Adventures Yet to Come</div>
+      <div class="chapters-grid" id="chaptersGrid"></div>
+    </div>
+  </div>
+
+  <!-- CONTINUES -->
+  <div class="rows" style="padding-top:0">
+    <div class="row">
+      <div class="row-header"><div class="row-title">🌠 The Story Continues...</div><span class="row-explore">Explore All ›</span></div>
+      <div class="row-cards" id="row4"></div>
+    </div>
+  </div>
+
+  <!-- MY GIRL VIDEO -->
+  <div id="sec-mygirl" class="mygirl-section">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="font-size:18px;font-weight:700;color:#e5e5e5;">🎬 My Girl 💕</div>
+      <div class="exclusive-tag">EXCLUSIVE</div>
+    </div>
+    <div class="video-wrapper">
+      <iframe src="https://drive.google.com/file/d/16TmMVhPNz61HABSz_Cab1rIxSF-_MlhU/preview" width="100%" height="500px" allow="autoplay" allowfullscreen frameborder="0" style="display:block;"></iframe>
+    </div>
+    <p style="margin-top:16px;font-size:13px;color:rgba(255,255,255,.4);font-style:italic;">💌 Just for you, always.</p>
+  </div>
+
+  <!-- SHAYARI SECTION -->
+  <div id="sec-shayari" style="position:relative;overflow:hidden;">
+
+    <!-- Tulip rain canvas — full page overlay on entry -->
+    <canvas id="tulipCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0;transition:opacity .8s ease;"></canvas>
+
+    <div style="position:relative;z-index:2;padding:70px 52px 100px;background:linear-gradient(180deg,#0a0a0a 0%,#0f0308 40%,#0a020a 70%,#0a0a0a 100%);">
+
+      <!-- ── SECTION HEADER ── -->
+      <div style="text-align:center;margin-bottom:80px;">
+        <div style="font-size:10px;letter-spacing:6px;color:var(--red);text-transform:uppercase;font-weight:700;margin-bottom:16px;opacity:.8;">✦ Sirf Tumhare Liye Likha Hai ✦</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,6vw,80px);color:#fff;letter-spacing:4px;line-height:1;">DILO KI <span style="color:var(--red);text-shadow:0 0 40px rgba(229,9,20,.5);">BAATEIN</span></div>
+        <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(14px,1.5vw,18px);color:rgba(255,255,255,.4);margin-top:16px;letter-spacing:1px;">Woh alfaaz jo dil ne likhe, zuban ne nahi...</div>
+        <div style="width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);margin:24px auto 0;"></div>
+        <div style="font-size:28px;margin-top:16px;animation:hbeat 1.5s ease-in-out infinite;">🌷</div>
+      </div>
+
+      <!-- ══ SECTION A: YAAD / INTEZAAR ══ -->
+      <div class="sh-section-block">
+        <div class="sh-section-label">🌙 Yaad &amp; Intezaar</div>
+        <div class="sh-grid" id="shGrid1"></div>
+      </div>
+
+      <!-- ══ SECTION B: MOHABBAT ══ -->
+      <div class="sh-section-block">
+        <div class="sh-section-label">❤️ Mohabbat</div>
+        <div class="sh-grid" id="shGrid2"></div>
+      </div>
+
+      <!-- ══ SECTION C: HUSN ══ -->
+      <div class="sh-section-block">
+        <div class="sh-section-label">✨ Tera Husn</div>
+        <div class="sh-grid" id="shGrid3"></div>
+      </div>
+
+      <!-- ══ SECTION D: DIL KI BAATEIN ══ -->
+      <div class="sh-section-block">
+        <div class="sh-section-label">🤌 Dil Ki Baatein</div>
+        <div class="sh-grid" id="shGrid4"></div>
+      </div>
+
+      <!-- ══ SECTION E: NAZM / POEM ══ -->
+      <div class="sh-section-block">
+        <div class="sh-section-label">📜 Nazm</div>
+        <div class="sh-grid sh-grid-single" id="shGrid5"></div>
+      </div>
+
+      <!-- Closing line -->
+      <div style="text-align:center;margin-top:70px;padding-top:40px;border-top:1px solid rgba(229,9,20,.1);">
+        <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(15px,1.8vw,22px);color:rgba(255,255,255,.5);line-height:2;">
+          "Har lafz mein tera naam hai,<br>har saans mein tera kaam hai,<br>tu na ho toh ye zindagi,<br>sirf ek anjaan sa subah-o-shaam hai..."
+        </div>
+        <div style="margin-top:20px;font-size:13px;font-weight:700;letter-spacing:2px;color:var(--red);">~ Yashraj to Vaishnavi 🌷</div>
+        <div style="font-size:36px;margin-top:16px;animation:hbeat 1.2s ease infinite;">❤️</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FULL GALLERY -->
+  <div class="photo-gallery">
+    <div class="gallery-title">📸 Our Complete Gallery</div>
+    <div class="gallery-grid" id="fullGallery"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════ SCREEN 3: CREDITS ══════════════════════ -->
+<div id="s-credits" class="screen">
+  <div class="credits-photo-bg">
+    <img src="https://lh3.googleusercontent.com/d/1A93jsTWJi-utEzy5g8yI3uDkqeqTrYFb" onerror="this.style.background='#0a0a0a'"/>
+  </div>
+  <div class="credits-scroll">
+    <div class="credits-inner">
+      <div class="cr-logo">NETFLIX PRESENTS</div>
+      <div class="cr-title">YASHRAJ <span class="amp">&</span> VAISHNAVI</div>
+      <div class="cr-sub">A Netflix Original Love Story · 2025</div>
+      <div class="film-strip">
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1mulc_sBFDC8m52Rou3fscq5_e8zWpn8G" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1u_scjZw5xO1Dx297Bc1weLXE3YTdqZl_" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1uwAfdo0Vsh8jv89T_aP9B849aOC73D6-" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1ZQ6BBittrlp8Q67g0oQUun1UYrlvKSOf" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1CeoI9CnGU71oT4FDQHp-6ckqxo4d4-tt" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1iot0MISJNjzBe7PElZJiFPs8_XSMUWmx" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1XmBXdWlu0fwTsjhzFtgty4E4HO5oJLKF" alt=""/></div>
+        <div class="film-frame"><img src="https://lh3.googleusercontent.com/d/1iJRW3X9WTnTtg4JkT2Nmtvp3jMLs763x" alt=""/></div>
+      </div>
+      <div class="cr-section">
+        <div class="cr-section-title">Production</div>
+        <div class="cr-line"><span class="cr-role">Directed By</span><span class="cr-name">Destiny</span></div>
+        <div class="cr-line"><span class="cr-role">Written By</span><span class="cr-name">Our Late Night Conversations</span></div>
+        <div class="cr-line"><span class="cr-role">Produced By</span><span class="cr-name">Pure, Unconditional Love</span></div>
+        <div class="cr-line"><span class="cr-role">Executive Producer</span><span class="cr-name">Every Fight We Survived Together</span></div>
+        <div class="cr-line"><span class="cr-role">Casting By</span><span class="cr-name">The Universe (Perfect Choices Only)</span></div>
+      </div>
+      <div class="cr-section">
+        <div class="cr-section-title">Cast & Crew</div>
+        <div class="cr-line"><span class="cr-role">Stunt Coordinator</span><span class="cr-name">Our Arguments That Made Us Stronger</span></div>
+        <div class="cr-line"><span class="cr-role">Catering By</span><span class="cr-name">Every Dinner Date & Midnight Snack</span></div>
+        <div class="cr-line"><span class="cr-role">Costume Design</span><span class="cr-name">Every "How Do I Look?" Moment</span></div>
+        <div class="cr-line"><span class="cr-role">Original Soundtrack</span><span class="cr-name">Your Laugh</span></div>
+        <div class="cr-line"><span class="cr-role">Cinematography</span><span class="cr-name">Every Stolen Glance & Secret Smile</span></div>
+        <div class="cr-line"><span class="cr-role">Special Effects</span><span class="cr-name">The Way You Make Me Feel</span></div>
+      </div>
+      <div class="cr-section">
+        <div class="cr-section-title">Lead Roles</div>
+        <div class="cr-line"><span class="cr-role">Best Boy</span><span class="cr-name">Yashraj 😄</span></div>
+        <div class="cr-line"><span class="cr-role">Leading Lady</span><span class="cr-name">Vaishnavi (Always & Forever)</span></div>
+        <div class="cr-line"><span class="cr-role">Post Production</span><span class="cr-name">Growing Together, Every Single Day</span></div>
+        <div class="cr-line"><span class="cr-role">Special Thanks</span><span class="cr-name">The Universe, For Timing That Worked</span></div>
+        <div class="cr-line"><span class="cr-role">No Hearts Harmed</span><span class="cr-name">Except Mine — In The Best Way 💘</span></div>
+      </div>
+      <div class="cr-mosaic">
+        <img src="https://lh3.googleusercontent.com/d/1y5Rk6TxNeXGf0tyHQdqVoUE1f2HZ-8ys" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1uwAfdo0Vsh8jv89T_aP9B849aOC73D6-" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1ZQ6BBittrlp8Q67g0oQUun1UYrlvKSOf" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1CeoI9CnGU71oT4FDQHp-6ckqxo4d4-tt" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1iot0MISJNjzBe7PElZJiFPs8_XSMUWmx" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1XmBXdWlu0fwTsjhzFtgty4E4HO5oJLKF" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1iJRW3X9WTnTtg4JkT2Nmtvp3jMLs763x" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1Hh8PtmPF-IJillLlFSIq7bsbLMRP6Nj0" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1-jj7KjBWB97Z20NxFV7ogycRKjD7ueFJ" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1Ab1rWT38FctrvYiiy2d_JnWQ-_A4H3FL" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1aiOlHsce_DF0aQvsq--M8YEXC7zSzh5T" alt=""/>
+        <img src="https://lh3.googleusercontent.com/d/1R5g4POoxmLEVMaPqU9mkUsHLMIdpIody" alt=""/>
+      </div>
+      <div class="cr-love">
+        <div class="cr-love-for">Dedicated With All My Heart To</div>
+        <div class="cr-love-name">Vaishnavi <span>🌹</span></div>
+        <div class="cr-love-note">
+          You are not just my person.<br>
+          You are my favourite story,<br>
+          my favourite place,<br>
+          and my favourite feeling — all at once.<br>
+          Every moment with you feels like the best scene<br>
+          of the greatest film ever made.
+          <span class="cr-love-sig">— Yashraj</span>
+        </div>
+        <span class="hb">❤️</span>
+      </div>
+      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+    </div>
+  </div>
+  <button class="back-home" onclick="goHome()">← Back to Home</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <img class="modal-img" src="https://lh3.googleusercontent.com/d/1jk9gVHcQB7PK6O-GiQYO2tC-PhiBwQ9F" alt="" onerror="this.style.background='#1a0a2e'"/>
+    <div class="modal-body">
+      <div class="modal-badge">🎬 NETFLIX ORIGINAL</div>
+      <div class="modal-title">YASHRAJ <span>&</span> VAISHNAVI</div>
+      <div class="modal-meta">
+        <span class="modal-match">💯% Match</span>
+        <span style="color:#808080;font-size:12px">2025</span>
+        <span style="border:1px solid #555;color:#808080;font-size:11px;padding:2px 8px">U/A 13+</span>
+        <span style="color:#808080;font-size:12px">Romantic Drama</span>
+        <span style="color:#46d369;font-size:11px;font-weight:700">● HD</span>
+      </div>
+      <p class="modal-desc">Two souls collided by chance, held together by choice. Written in late-night texts, stolen glances, and every moment that made time stand still. From the very first hello to every laugh, every adventure, every quiet evening — this is the story of Yashraj and Vaishnavi.<br><br><em>Not just a love story. Their love story.</em></p>
+      <div class="modal-btns">
+        <button class="mbtn-play" onclick="closeModal();goCredits()">▶ Play Now</button>
+        <button class="mbtn-list">+ My List</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-prev" onclick="lbPrev()">‹</button>
+  <img id="lbImg" src="" alt=""/>
+  <button class="lb-next" onclick="lbNext()">›</button>
+</div>
+
+<script>
+// ─── DATA ───
+const CORRECT_PIN = '1331';
+
+const PROFILE_DATA = {
+  yashraj:   { name:'Yashraj 💛',  img:'https://lh3.googleusercontent.com/d/19NGH51y5kH13WmtphMrAnlGAbzi0K1Qv',  msg:'Welcome back, Yashraj!' },
+  vaishnavi: { name:'Vaishnavi ❤️', img:'https://lh3.googleusercontent.com/d/1VwAzo-IjKJfwKEc12jjW14LzakHNQaA-', msg:'Welcome, my love! 🌹' },
+  together:  { name:'Together 🌙',  img:'https://lh3.googleusercontent.com/d/1G0QWxuGL8v7eh9Lf6tKRYEgvKfDc6adM',  msg:'Together, always ✨' },
+  forever:   { name:'Forever & More 💚', img:'https://lh3.googleusercontent.com/d/1aXTgJSilnJ7xr6giCfkWkx53c0nTBx9L', msg:'Forever & always 💚∞' },
+};
+
+const PHOTOS = [
+  "https://lh3.googleusercontent.com/d/1nMB-pMgTnS5lLRA0l-F-xuAIUy1yYkow",
+  "https://lh3.googleusercontent.com/d/1iB6BwR2GYiw6_OzFjc2vZxij2N6lmEWt",
+  "https://lh3.googleusercontent.com/d/1K9U7xBfBf5TvMS3qRbcr_G3O9HnTQvhC",
+  "https://lh3.googleusercontent.com/d/1aXTgJSilnJ7xr6giCfkWkx53c0nTBx9L",
+  "https://lh3.googleusercontent.com/d/1G0QWxuGL8v7eh9Lf6tKRYEgvKfDc6adM",
+  "https://lh3.googleusercontent.com/d/1M0-ZWy4l3rOE6-rKsma_-5yzlsoNpNBg",
+  "https://lh3.googleusercontent.com/d/1CBijpe4rrOoW9cSO4sPbH_cumrNRRXso",
+  "https://lh3.googleusercontent.com/d/1RzRUPhyaNKoILulJ2JZxLXa8Mk8hWI5z",
+  "https://lh3.googleusercontent.com/d/1Mh7AdIxK0_s-vnyJqoJwIusszaNI6tZw",
+  "https://lh3.googleusercontent.com/d/1MvBpTqGA-ypz-jL5olEGWS-oGc-jOyxM",
+  "https://lh3.googleusercontent.com/d/1Bnm2Wflu5AA6CLCQYTrYYUGFKroBk88V",
+  "https://lh3.googleusercontent.com/d/1sHvaHArBsqqI5u8AdjcTecZUpBhBCI4Z",
+  "https://lh3.googleusercontent.com/d/1jQQudK8L9530U_H8-8JSsiAT16gVeXTF",
+  "https://lh3.googleusercontent.com/d/1A93jsTWJi-utEzy5g8yI3uDkqeqTrYFb",
+  "https://lh3.googleusercontent.com/d/1mulc_sBFDC8m52Rou3fscq5_e8zWpn8G",
+  "https://lh3.googleusercontent.com/d/1u_scjZw5xO1Dx297Bc1weLXE3YTdqZl_",
+  "https://lh3.googleusercontent.com/d/1cOi6EOEAqKHt01uf-Zdek4LiOsnswZDN",
+  "https://lh3.googleusercontent.com/d/1F_ffrS0pSxegBrdHUnWCHno0bZk3dM6j",
+  "https://lh3.googleusercontent.com/d/1GTrUJLS5w1SddimwiLipVNUQcIv6g79S",
+  "https://lh3.googleusercontent.com/d/1VwAzo-IjKJfwKEc12jjW14LzakHNQaA-",
+  "https://lh3.googleusercontent.com/d/1y5Rk6TxNeXGf0tyHQdqVoUE1f2HZ-8ys",
+  "https://lh3.googleusercontent.com/d/1Ab1rWT38FctrvYiiy2d_JnWQ-_A4H3FL",
+  "https://lh3.googleusercontent.com/d/1aiOlHsce_DF0aQvsq--M8YEXC7zSzh5T",
+  "https://lh3.googleusercontent.com/d/1R5g4POoxmLEVMaPqU9mkUsHLMIdpIody",
+  "https://lh3.googleusercontent.com/d/167OSjznK1r7ajv12RQLaj9EvKL0zpubJ",
+  "https://lh3.googleusercontent.com/d/1IlfZJnpNFbGVSpM9xMifobw_Bng1A6x2",
+  "https://lh3.googleusercontent.com/d/14yGqt06pf2XJZdfOlPGWMRcyIXvlgLex",
+  "https://lh3.googleusercontent.com/d/1ZeYjGy43sqIGN3cCCng4Il6dUtvTnFYh",
+  "https://lh3.googleusercontent.com/d/1jk9gVHcQB7PK6O-GiQYO2tC-PhiBwQ9F",
+  "https://lh3.googleusercontent.com/d/17wWkAHjSEwh_gNLQI9zyRJKK1eIJkJ6I",
+  "https://lh3.googleusercontent.com/d/19mpb2i9xER6MfkTkUZUx4a0QJqOyJzhK",
+  "https://lh3.googleusercontent.com/d/1ZmK15MNS5cz7s7fyRY88MDA2bjA5KnY_",
+  "https://lh3.googleusercontent.com/d/1kSKYCyc_05cionuWnqzUBWxkEpULxxy9",
+  "https://lh3.googleusercontent.com/d/1n_im3c73bKMIgauX8Wa69-BcLmm3WY6f",
+  "https://lh3.googleusercontent.com/d/1_ntCqZQBmtjMBE-m6cOUyfGEcSpZgKPp",
+  "https://lh3.googleusercontent.com/d/16TmMVhPNz61HABSz_Cab1rIxSF-_MlhU",
+  "https://lh3.googleusercontent.com/d/1Ucg4dJAe73otDyxyFZtls7zDEejdH4CS",
+  "https://lh3.googleusercontent.com/d/1uwAfdo0Vsh8jv89T_aP9B849aOC73D6-",
+  "https://lh3.googleusercontent.com/d/1ZQ6BBittrlp8Q67g0oQUun1UYrlvKSOf",
+  "https://lh3.googleusercontent.com/d/1CeoI9CnGU71oT4FDQHp-6ckqxo4d4-tt",
+  "https://lh3.googleusercontent.com/d/1iot0MISJNjzBe7PElZJiFPs8_XSMUWmx",
+  "https://lh3.googleusercontent.com/d/1XmBXdWlu0fwTsjhzFtgty4E4HO5oJLKF",
+  "https://lh3.googleusercontent.com/d/1iJRW3X9WTnTtg4JkT2Nmtvp3jMLs763x",
+  "https://lh3.googleusercontent.com/d/1Hh8PtmPF-IJillLlFSIq7bsbLMRP6Nj0",
+  "https://lh3.googleusercontent.com/d/1-jj7KjBWB97Z20NxFV7ogycRKjD7ueFJ"
+];
+
+const ROWS = [
+  {id:'row1',items:[{img:0,label:'Day One 💛',sub:'Season 1 · Ep 1'},{img:5,label:'First Date',sub:'Season 1 · Ep 2'},{img:10,label:'Birthday Surprise',sub:'Special'},{img:15,label:'Late Night Drive',sub:'Season 1 · Ep 5'},{img:20,label:'Our Café Spot',sub:'Season 2 · Ep 1'},{img:25,label:'Random Selfies',sub:'Season 2 · Ep 3'},{img:30,label:'Candlelight',sub:'Season 3 · Ep 2'},{img:37,label:'Fresh Memory ✨',sub:'Season 4 · Ep 1'},{img:38,label:'Our Vibe 🌟',sub:'Season 4 · Ep 2'}]},
+  {id:'row2',items:[{img:3,label:'Movie Night 🎬',sub:'Viewer Favorite'},{img:8,label:'City Lights Walk',sub:'Top Rated'},{img:13,label:'Garden Picnic',sub:'Critics Pick'},{img:18,label:'Evening Out 🎡',sub:'Fan Favorite'},{img:23,label:'Dance Together',sub:'Gold Star'},{img:28,label:'Road Trip Vibes',sub:'Top 10'},{img:33,label:'Dinner Date',sub:'Must Watch'},{img:39,label:'New Chapter 🌸',sub:'Latest Drop'},{img:40,label:'Just Us 💑',sub:'Exclusive'}]},
+  {id:'row3',items:[{img:2,label:'That One Time... 😅',sub:'Comedy'},{img:7,label:'The Awkward Moment',sub:'Comedy'},{img:12,label:'Our Inside Jokes',sub:'Comedy'},{img:17,label:'When We Got Lost',sub:'Adventure'},{img:22,label:'Silly Arguments 😜',sub:'Drama'},{img:27,label:'Weird Phases',sub:'Comedy'},{img:32,label:'Best Chaos 🫶',sub:'Action'},{img:41,label:'Candid Shot 📸',sub:'Behind The Scenes'},{img:42,label:'Real Moment 💫',sub:'Unfiltered'}]},
+  {id:'row4',items:[{img:4,label:'Mountains Trip 🏔️',sub:'Coming Soon'},{img:9,label:'Beach Getaway 🏖️',sub:'In Development'},{img:14,label:'New City 🌍',sub:'Pre-Production'},{img:19,label:'Night Adventure 🌃',sub:'Coming Soon'},{img:24,label:'Next Big Step 💍',sub:'★ Most Anticipated'},{img:29,label:'Every Next Chapter 🌸',sub:'Series Finale'},{img:34,label:'Our Future 🌠',sub:'Eternal'},{img:43,label:'2026 Memories 🗓️',sub:'New Season'},{img:44,label:'Always & Forever ♾️',sub:'Eternal'}]}
+];
+
+const WATCHLIST = [
+  {img:4,title:'Manali Trip 🏔️',desc:'A snow trip — just the two of us, hot chocolate and mountain roads.',tag:'PLAN IN PROGRESS'},
+  {img:9,title:'Goa Beach Week 🏖️',desc:'Sunsets, seafood and doing absolutely nothing, perfectly.',tag:'DREAM DESTINATION'},
+  {img:24,title:'Next Big Step 💍',desc:'The chapter where everything changes — for the best.',tag:'MOST ANTICIPATED'},
+  {img:19,title:'Midnight City Walk',desc:'No plans, just us, street lights and wherever we end up.',tag:'COMING SOON'},
+  {img:14,title:'New City Together',desc:'Exploring somewhere neither of us has been, writing a new story.',tag:'IN DEVELOPMENT'},
+  {img:29,title:'Our Bucket List',desc:"Every single thing we said 'let's do that someday' — let's do it.",tag:'ETERNAL'},
+];
+
+const CHAPTERS = [
+  {img:4,num:'CHAPTER 01',title:'The Mountains Are Calling',desc:"Snow, silence, and your hand in mine. A winter escape we've been planning forever.",badge:'COMING SOON'},
+  {img:9,num:'CHAPTER 02',title:'By The Sea',desc:'Waves, golden hour, and two people who have nowhere else they\'d rather be.',badge:'DREAM'},
+  {img:24,num:'CHAPTER 03',title:'The Question',desc:'The moment everything becomes forever. The scene the whole story has been building to.',badge:'★ MOST AWAITED'},
+  {img:14,num:'CHAPTER 04',title:'Our New City',desc:'New streets, new cafes, new memories. Same us — just more of everything.',badge:'IN DEVELOPMENT'},
+  {img:29,num:'CHAPTER 05',title:'Every Morning After',desc:'Waking up every day and choosing each other. The best kind of ongoing series.',badge:'ETERNAL'},
+  {img:19,num:'CHAPTER 06',title:'Adventures Without An Itinerary',desc:'No plan. Just a full tank, good music, and each other. Pure magic.',badge:'COMING SOON'},
+];
+
+// ─── PIN SYSTEM ───
+let pinBuffer = '';
+let currentProfile = null;
+
+function openPin(profile) {
+  const data = PROFILE_DATA[profile];
+  currentProfile = profile;
+  pinBuffer = '';
+  
+  // Set avatar & name
+  document.getElementById('pinAvatarImg').src = data.img;
+  document.getElementById('pinNameLabel').textContent = data.name;
+  
+  // Reset dots
+  resetDots();
+  document.getElementById('pinError').classList.remove('show');
+  
+  document.getElementById('pinOverlay').classList.add('open');
+}
+
+function closePin() {
+  document.getElementById('pinOverlay').classList.remove('open');
+  pinBuffer = '';
+  resetDots();
+}
+
+function resetDots(cls='') {
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('dot'+i);
+    d.className = 'pin-dot' + (cls ? ' '+cls : '');
+  }
+}
+
+function updateDots() {
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('dot'+i);
+    d.className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
+  }
+}
+
+function pinPress(digit) {
+  if(pinBuffer.length >= 4) return;
+  
+  // Haptic-like click sound
+  playClick();
+  
+  pinBuffer += digit;
+  updateDots();
+  document.getElementById('pinError').classList.remove('show');
+  
+  if(pinBuffer.length === 4) {
+    setTimeout(() => checkPin(), 180);
+  }
+}
+
+function pinDelete() {
+  if(pinBuffer.length > 0) {
+    pinBuffer = pinBuffer.slice(0,-1);
+    updateDots();
+  }
+}
+
+function checkPin() {
+  if(pinBuffer === CORRECT_PIN) {
+    // SUCCESS — green dots
+    resetDots('success');
+    playSuccess();
+    setTimeout(() => {
+      document.getElementById('pinOverlay').classList.remove('open');
+      showPinSuccess();
+    }, 600);
+  } else {
+    // WRONG — red dots + shake
+    resetDots('error');
+    playError();
+    document.getElementById('pinError').classList.add('show');
+    const dots = document.getElementById('pinDots');
+    dots.classList.add('shake');
+    setTimeout(() => {
+      dots.classList.remove('shake');
+      pinBuffer = '';
+      resetDots();
+    }, 500);
+  }
+}
+
+function showPinSuccess() {
+  const data = PROFILE_DATA[currentProfile];
+  // Extract first name nicely
+  const firstName = data.name.split(' ')[0];
+  document.getElementById('successName').textContent = firstName;
+  document.getElementById('pinSuccess').classList.add('open');
+}
+
+function proceedToHome() {
+  document.getElementById('pinSuccess').classList.remove('open');
+  enterHome();
+}
+
+// ─── SOUNDS ───
+function playTudum() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const t = ctx.currentTime;
+    const makeOsc = (type,f1,f2,g1,t0,t1,t2) => {
+      const o=ctx.createOscillator();const g=ctx.createGain();
+      o.type=type;o.frequency.setValueAtTime(f1,t+t0);
+      o.frequency.exponentialRampToValueAtTime(f2,t+t1);
+      g.gain.setValueAtTime(0,t+t0);g.gain.linearRampToValueAtTime(g1,t+t0+0.03);
+      g.gain.exponentialRampToValueAtTime(0.001,t+t2);
+      o.connect(g);g.connect(ctx.destination);o.start(t+t0);o.stop(t+t2+0.1);
+    };
+    makeOsc('sine',80,38,1.2,0,0.4,0.55);
+    makeOsc('triangle',220,55,0.9,0.05,0.35,0.5);
+    makeOsc('sine',600,140,0.6,0.1,0.8,1.0);
+    makeOsc('sine',120,45,0.4,0.2,1.2,1.4);
+    makeOsc('sawtooth',45,30,0.2,0.15,0.9,1.2);
+  } catch(e){}
+}
+
+function playClick() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 800;
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.08);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+0.08);
+  } catch(e){}
+}
+
+function playError() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.value = 220;
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+0.3);
+  } catch(e){}
+}
+
+function playSuccess() {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const t = ctx.currentTime;
+    [[523,0],[659,0.12],[784,0.24],[1047,0.36]].forEach(([freq,delay]) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0,t+delay);
+      g.gain.linearRampToValueAtTime(0.2,t+delay+0.05);
+      g.gain.exponentialRampToValueAtTime(0.001,t+delay+0.3);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(t+delay); o.stop(t+delay+0.35);
+    });
+  } catch(e){}
+}
+
+// ─── NAV ───
+function navScrollTo(sectionId) {
+  const homeEl = document.getElementById('s-home');
+  const target = document.getElementById(sectionId);
+  if(!homeEl||!target) return;
+  document.querySelectorAll('.nf-links li').forEach(li=>li.classList.remove('active-link'));
+  const map={'sec-home':'nl-home','sec-story':'nl-story','sec-memories':'nl-memories','sec-watchlist':'nl-watchlist','sec-chapters':'nl-chapters','sec-mygirl':'nl-mygirl','sec-shayari':'nl-shayari'};
+  if(map[sectionId]) document.getElementById(map[sectionId]).classList.add('active-link');
+  homeEl.scrollTo({top:target.offsetTop-70,behavior:'smooth'});
+}
+
+// ─── SCREEN TRANSITIONS ───
+function startExperience() {
+  const ip = document.getElementById('s-intropass');
+  ip.style.transition = 'opacity .6s ease';
+  ip.style.opacity = '0';
+  setTimeout(() => {
+    ip.classList.remove('active');
+    const p = document.getElementById('s-profiles');
+    p.classList.add('active', 'fade-in');
+  }, 700);
+}
+
+function enterHome() {
+  document.getElementById('s-profiles').classList.remove('active');
+  const h=document.getElementById('s-home');
+  h.classList.add('active','fade-in');
+  h.scrollTop=0;
+  createParticles();
+  setupScrollSpy();
+}
+
+function goCredits() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-credits').classList.add('active','fade-in');
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-home').classList.add('active','fade-in');
+}
+
+// ─── PARTICLES ───
+function createParticles() {
+  const container=document.getElementById('particles');
+  container.innerHTML='';
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;animation-duration:${6+Math.random()*10}s;animation-delay:${Math.random()*8}s;--dx:${(Math.random()-.5)*100}px;opacity:${.3+Math.random()*.7};`;
+    container.appendChild(p);
+  }
+}
+
+// ─── HERO SLIDESHOW ───
+let slideIdx=0;
+const slides=document.querySelectorAll('.hero-bg-slide');
+setInterval(()=>{
+  slides[slideIdx].classList.remove('active');
+  slideIdx=(slideIdx+1)%slides.length;
+  slides[slideIdx].classList.add('active');
+},5000);
+
+// ─── BUILD ROWS ───
+ROWS.forEach(row=>{
+  const container=document.getElementById(row.id);
+  row.items.forEach(item=>{
+    const url=PHOTOS[item.img%PHOTOS.length];
+    const card=document.createElement('div');
+    card.className='mcard';
+    card.onclick=()=>openLightbox(item.img);
+    card.innerHTML=`<img src="${url}" alt="${item.label}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'"/>
+      <div class="mcard-overlay"></div>
+      <div class="mcard-info">
+        <div class="mcard-actions"><div class="mac-btn">▶</div><div class="mac-btn">+</div><div class="mac-btn">👍</div></div>
+        <span class="mcard-lbl">${item.label}</span>
+        <span class="mcard-sub">${item.sub}</span>
+      </div>`;
+    container.appendChild(card);
+  });
+});
+
+// Build watchlist
+const wg=document.getElementById('watchlistGrid');
+WATCHLIST.forEach(item=>{
+  const url=PHOTOS[item.img%PHOTOS.length];
+  const card=document.createElement('div');
+  card.className='wl-card';
+  card.onclick=()=>openLightbox(item.img);
+  card.innerHTML=`<img class="wl-img" src="${url}" onerror="this.style.background='#1a0a2e'"/>
+    <div class="wl-body"><div class="wl-title">${item.title}</div><div class="wl-desc">${item.desc}</div><span class="wl-tag">${item.tag}</span></div>`;
+  wg.appendChild(card);
+});
+
+// Build chapters
+const cg=document.getElementById('chaptersGrid');
+CHAPTERS.forEach(item=>{
+  const url=PHOTOS[item.img%PHOTOS.length];
+  const card=document.createElement('div');
+  card.className='ch-card';
+  card.onclick=()=>openLightbox(item.img);
+  card.innerHTML=`<img class="ch-img" src="${url}" onerror="this.style.background='#1a0a2e'"/>
+    <span class="ch-badge">${item.badge}</span>
+    <div class="ch-body"><div class="ch-number">${item.num}</div><div class="ch-title">${item.title}</div><div class="ch-desc">${item.desc}</div></div>`;
+  cg.appendChild(card);
+});
+
+// Full gallery
+const gallery=document.getElementById('fullGallery');
+PHOTOS.forEach((url,i)=>{
+  const item=document.createElement('div');
+  item.className='gallery-item';
+  item.onclick=()=>openLightbox(i);
+  item.innerHTML=`<img src="${url}" alt="Memory ${i+1}" loading="lazy" onerror="this.parentElement.style.background='#1a0a2e'"/>`;
+  gallery.appendChild(item);
+});
+
+// ─── MODAL ───
+function openModal(){document.getElementById('modal').classList.add('open')}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+// ─── LIGHTBOX ───
+let lbCurrent=0;
+function openLightbox(idx){lbCurrent=idx%PHOTOS.length;document.getElementById('lbImg').src=PHOTOS[lbCurrent];document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
+function lbPrev(){lbCurrent=(lbCurrent-1+PHOTOS.length)%PHOTOS.length;document.getElementById('lbImg').src=PHOTOS[lbCurrent]}
+function lbNext(){lbCurrent=(lbCurrent+1)%PHOTOS.length;document.getElementById('lbImg').src=PHOTOS[lbCurrent]}
+document.getElementById('lightbox').addEventListener('click',function(e){if(e.target===this)closeLightbox()});
+// ─── INTRO PASSWORD ───
+function showIntroPass() {
+  playTudum();
+  const intro = document.getElementById('s-intro');
+  intro.style.transition = 'opacity .6s ease';
+  intro.style.opacity = '0';
+  setTimeout(() => {
+    intro.classList.remove('active');
+    const ip = document.getElementById('s-intropass');
+    ip.classList.add('active', 'fade-in');
+    // Auto focus input
+    setTimeout(() => {
+      const inp = document.getElementById('introPassInput');
+      if (inp) inp.focus();
+    }, 400);
+  }, 700);
+}
+
+let introErrTimer = null;
+function checkIntroPass(val) {
+  const clean = val.trim().toLowerCase();
+  const icon = document.getElementById('introPassIcon');
+  const err = document.getElementById('introPassErr');
+  const inp = document.getElementById('introPassInput');
+
+  if (clean === 'vaishnavi') {
+    icon.textContent = '✅';
+    err.style.opacity = '0';
+    inp.style.borderColor = '#46d369';
+    inp.style.boxShadow = '0 0 25px rgba(70,211,105,.2)';
+    playSuccess();
+    setTimeout(() => startExperience(), 700);
+  } else if (clean.length >= 9) {
+    icon.textContent = '💔';
+    err.style.opacity = '1';
+    inp.style.borderColor = 'rgba(229,9,20,.8)';
+    inp.style.boxShadow = '0 0 20px rgba(229,9,20,.15)';
+    clearTimeout(introErrTimer);
+    introErrTimer = setTimeout(() => {
+      err.style.opacity = '0';
+      icon.textContent = '🌷';
+      inp.style.borderColor = 'rgba(229,9,20,.3)';
+      inp.style.boxShadow = 'none';
+      inp.value = '';
+    }, 1800);
+  } else {
+    err.style.opacity = '0';
+    icon.textContent = '🌷';
+  }
+}
+
+// Allow Enter key too
+document.addEventListener('keydown', e => {
+  if (document.getElementById('s-intropass').classList.contains('active')) {
+    if (e.key === 'Enter') {
+      const val = document.getElementById('introPassInput')?.value || '';
+      checkIntroPass(val);
+    }
+  }
+  // existing lightbox / modal / pin keydowns below
+  if(document.getElementById('lightbox').classList.contains('open')){
+    if(e.key==='ArrowLeft')lbPrev();
+    if(e.key==='ArrowRight')lbNext();
+    if(e.key==='Escape')closeLightbox();
+  }
+  if(document.getElementById('modal').classList.contains('open')&&e.key==='Escape')closeModal();
+  if(document.getElementById('pinOverlay').classList.contains('open')){
+    if(e.key>='0'&&e.key<='9')pinPress(e.key);
+    if(e.key==='Backspace')pinDelete();
+    if(e.key==='Escape')closePin();
+  }
+});
+
+// ─── SHAYARI DATA (all sections) ───
+
+const SH_YAAD = [
+  `अगर कभी मेरी याद आए,
+तो गुजरती हवा की लहरों पे हाथ रखना...
+मैं खुशबुओं में तुम्हें मिलूँगा।
+मुझे गुलाबों की पत्तियों में तलाश करना,
+मैं ओस के बूंदो के आइनों में तुम्हें मिलूँगा।
+अगर सितारों में, ओस कतरों में, खुशबुओं में ना पाओ मुझको...
+तो अपने कदमों में देख लेना,
+और जो धूळ उड़ रही होगी उसमें मैं मिलूँगा 🌷🤍`,
+
+  `Kabhi subha yaad aate ho..
+toh kabhi sham ko yaad aate ho..
+Kabhi kabhi itna yaad aate ho ki...
+Aaina hum dekhte hain aur
+nazar aap aate ho.. 🫣🤌🏻🤍`,
+
+  `Tere naam se mohabbat ki hai..
+tere ehsaas se mohabbat ki hai..
+tum mere paas nahi ho phir bhi,
+teri yaad se mohabbat ki hai..
+Kabhi tumne bhi mujhe yaad kiya hoga,
+Maine un lamhaat se mohabbat ki..
+tumse milna toh ek khwaab sa lagta hai,
+toh phir maine toh tere intezaar se mohabbat ki... 🌷🤌🏻`,
+
+  `Maine ishq likha — uska naam aaya,
+maine chaand likha toh uska chehra nazar aaya,
+maine khwaab likha toh uski aankhen dikhin,
+aur maine jab sukoon likha toh uski baahein mili.`,
+];
+
+const SH_MOHABBAT = [
+  `Itna kisine chaha nahi hoga tujhe
+Jitna maine sirf socha hai
+Jis sheher ke naam bhi tujhe waqif nahi
+Unn sheheron mein tere naam se jaante hain mujhe
+Har mandir ke har bhagwaan ko tera naam yaad hai
+Unse jaake mil ek baar —
+teri hi kahaniyan sunayenge tujhe ❤️‍🩹`,
+
+  `Khud ko teri yaadon ka ghulam kar diya...
+Teri khaatir khud ko badnaam kar diya...
+Ab aur kya saboot doon tujhe mere mohabbat ka main...
+Ek hi dil tha — woh bhi tere naam kar diya. 🤌🏻🤍`,
+
+  `Ki tum pasand aaye woh ittifaaq tha....
+Aur tum hi pasand rehgaye — ye Ishq hai. 🤌🏻`,
+
+  `Tu hai toh duniya mein rakha kya hai
+Tu nahi toh duniya mein rakha kya hai. 🫣🤌🏻`,
+
+  `Marte waqt bhi likhunga tera naam apni hatheli par...
+Marte waqt mujhe is duniya se
+khaali haath nahi jaana. 🤌🏻🌷`,
+
+  `Agar tu zeher hai toh ye zeher mujhe peena hai...
+Log marne ki baatein karte hain Ishq mein...
+Mujhe tere khaatir jeena hai... 🤌🏻`,
+
+  `Mujhe sharab pilayi gayi hai aankhon se
+Mera nasha ab hazaaron baras mein utrega.`,
+
+  `Main usko aansuon se likh raha hoon
+Meri baat usko koi padh nahi paayega.`,
+];
+
+const SH_HUSN = [
+  `Chand, sitaare, phool, parinde, sham, subah ek taraf —
+Saari duniya uska chehra ek taraf
+Aur uska chehra ek taraf. 🤌🏻🤍`,
+
+  `Teri aankhon ke saamne ye seher —
+kaun dekhega?
+Tu dariya si hai yeh lahar —
+kaun dekhega?
+Tu khubsurat se bhi zyada khubsurat hai,
+tujhe dekhne ke baad
+chaand 🌙 kaun dekhega.... ♥️`,
+
+  `वो चांद भी तुम्हारे सामने सादा लगे,
+हूर की परी फीकी, तुम्हारा नूर ज़्यादा लगे,
+मत पूछा करो कैसे लगते हो तुम मुझे,
+तुम ऐसे लगते हो जैसे कृष्ण को राधा लगे. 😍`,
+
+  `Duniya ki tamam sundarta ek taraf
+Aur baith kar tujhe dekhna ek taraf.`,
+
+  `Jab chaand par dil aa jaaye
+tab sitaaron pe nazar nahi padti.
+
+Kisne kaha ishq sirf ek baar hota hai...
+Jitni baar tumhein dekhta hoon
+utni baar hota hai.
+
+Kisne kaha mohabbat sirf filmon mein hoti hai...
+Main toh roz tumhein dekh ke naya scene likh deta hoon. 💛`,
+
+  `Jab ji bhar ke dekhne baitha use
+toh ek shaam kya — umra bhi kam lagti hai.
+Woh itni khubsurat hai
+uske aage duniya ki har khubsurti
+bhram lagti hai.`,
+
+  `Kaise dekhu kisi aur ko ki meri aankhon mein sirf tum ho,
+nazaare lakh haseen sahi magar meri nazar mein khubsurat sirf tum ho,
+chaand taare phool khushbuyein — ye sab bhi achha hai,
+magar main kya karun un sabka,
+ki mere liye kaafi sirf tum ho. 🫣😗🤌🏻`,
+
+  `Tere hi chehere se nazar nahi hatati,
+zamaane ki nazarein kya hi dekhein hum.
+
+Ek jhalak dekhke teri
+hum chale jaayenge —
+kaun aaya hai idhar umra bitaane. 🤌🏻`,
+];
+
+const SH_DIL = [
+  `Tujhe hai jab se dekha bhool gaya hoon sab,
+teri kali saree ne aisa jaadu kiya ki bhool gaye abhi alfaaz....
+Kabhi alfaaz bhool jaun kabhi baat bhool jaun..
+Tujhe is qadar chahun ki Ishq ki auqaat bhool jaun..
+Khuda se mangu toh itna mangu tujhe..
+Ki sajde mein jhukun aur duniya bhool jaun..
+Likhne pe aaun toh tujh pe poori kitaab likh doon main..
+Koi naam le tere toh lehza apna likh doon main.. 🤌🏻😗🫣`,
+
+  `Tere ghar wale kya jaanein tere baare mein,
+Koi mujhse pooche ahimiyyat teri...
+Main toh khud ko girwi rakh doon agar...
+Tere gharwale mere saamne lagayen qeemat teri.`,
+
+  `Lajmi hai tera gurur karna kyunki
+Hum jise chahein woh mamooli toh nahi ho sakta. 😮‍💨`,
+
+  `Tu baar baar roothe mujhse,
+Main baar baar manaunga.
+Tu maan ke chaahe galey lagaa,
+Tu na maan toh bhi jaana — main tera hi hoon...
+Tu aadat hai, hai zaroorat meri,
+Tujhse dur hona koi sawaal hai?
+Tujhe paa lun toh kismat ki ibaadat karun,
+Naa paa sakun toh bhi jaana — tera hi hoon main...
+
+Ye dil Ishq mein choor hai,
+Tu mujhpe thodi lagaam laga,
+Main theek rahun toh ganeemaat hai,
+Jo paagal hua toh bhi jaana — tera hi...
+
+Ab aakhir mein bas yun kahun.....
+Ye dil sadaa se tera tha,
+Tu le le chaahe jaan meri,
+Main zinda tha toh tera tha,
+Main marke bhi jaana — tera hi rahunga.... 🌷`,
+];
+
+const SH_NAZM = [
+  `झीलें क्या हैं? उसकी आँखें 👀
+उम्दा क्या है? उसका चेहरा 🤌🏻
+ख़ुश्बू क्या है? उसकी साँसें
+ख़ुशियाँ क्या हैं? उसका होना 🤌🏻
+तो ग़म क्या है? उससे जुदाई 🥹
+सावन क्या है? उसका रोना
+सर्दी क्या है? उसकी उदासी
+गर्मी क्या है? उसका ग़ुस्सा
+और बहारें? उसका हँसना
+मीठा क्या है? उसकी बातें
+कड़वा क्या है? मेरी बातें 😁
+क्या पढ़ना है? उसका लिखा
+क्या सुनना है? उसकी ग़ज़लें
+लब की ख़्वाहिश? उसका माथा
+ज़ख़्म की ख़्वाहिश? उसका छूना
+दुनिया क्या है? इक जंगल है
+और तुम क्या हो? पेड़ समझ लो
+और वो क्या है? इक राही है
+
+क्या सोचा है? वैष्णवी से मोहब्बत 🤍
+क्या करते हो? वैष्णवी से मोहब्बत 🤍
+मतलब पेशा? वैष्णवी से मोहब्बत 🤍
+इस के अलावा? वैष्णवी से मोहब्बत 🤍
+वैष्णवी से मोहब्बत 🤍
+वैष्णवी से मोहब्बत 🤍
+वैष्णवी से मोहब्बत 🤍
+बस वैष्णवी से मोहब्बत... ✨🥹🤍 🤌🏻😗`,
+];
+
+function buildShGrid(gridId, poems, wide=false) {
+  const container = document.getElementById(gridId);
+  if (!container) return;
+  poems.forEach((text, i) => {
+    const card = document.createElement('div');
+    card.className = 'sh-card' + (wide ? ' sh-card-wide' : '');
+    card.style.cssText = `opacity:0;transform:translateY(28px);transition:opacity .55s ease ${i*0.1}s,transform .55s ease ${i*0.1}s`;
+    card.innerHTML = `
+      <div class="sh-tulip">🌷</div>
+      <div class="sh-text">${text.replace(/\n/g,'<br>')}</div>
+      <div class="sh-sig">~ Yashraj to Vaishnavi 🌷</div>`;
+    container.appendChild(card);
+  });
+}
+
+buildShGrid('shGrid1', SH_YAAD);
+buildShGrid('shGrid2', SH_MOHABBAT);
+buildShGrid('shGrid3', SH_HUSN);
+buildShGrid('shGrid4', SH_DIL);
+buildShGrid('shGrid5', SH_NAZM, true);
+
+// Intersection observer for card entrance
+const shObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, {threshold: 0.08});
+document.querySelectorAll('.sh-card').forEach(c => shObserver.observe(c));
+
+// ─── TULIP RAIN (fires on page load, full screen, 8 seconds) ───
+function startTulipRain(duration=8000) {
+  const canvas = document.getElementById('tulipCanvas');
+  if (!canvas || canvas._running) return;
+  canvas._running = true;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.opacity = '1';
+  canvas.style.zIndex = '9999';
+
+  const ctx2 = canvas.getContext('2d');
+  const tulips = [];
+
+  class Tulip {
+    constructor(init) {
+      this.x = Math.random() * canvas.width;
+      this.y = init ? Math.random() * -canvas.height * 1.2 : -(20 + Math.random()*60);
+      this.size = 16 + Math.random() * 22;
+      this.speed = 1.2 + Math.random() * 2.2;
+      this.rot = Math.random() * 360;
+      this.rotSpeed = (Math.random()-.5) * 2.5;
+      this.sway = 0.8 + Math.random() * 1.8;
+      this.swayOff = Math.random() * Math.PI * 2;
+      this.opacity = 0.55 + Math.random() * 0.45;
+      this.tick = Math.random() * 200;
+    }
+    update() {
+      this.tick++;
+      this.y += this.speed;
+      this.x += Math.sin(this.tick * 0.018 + this.swayOff) * this.sway;
+      this.rot += this.rotSpeed;
+    }
+    draw() {
+      ctx2.save();
+      ctx2.globalAlpha = this.opacity;
+      ctx2.translate(this.x, this.y);
+      ctx2.rotate(this.rot * Math.PI / 180);
+      ctx2.font = `${this.size}px serif`;
+      ctx2.textAlign = 'center';
+      ctx2.textBaseline = 'middle';
+      ctx2.fillText('🌷', 0, 0);
+      ctx2.restore();
+    }
+    offscreen() { return this.y > canvas.height + 60; }
+  }
+
+  // Start with 50 tulips spread across
+  for (let i = 0; i < 50; i++) tulips.push(new Tulip(true));
+
+  let running = true;
+  let spawnCount = 0;
+  const maxSpawn = 80;
+
+  function loop() {
+    if (!running) return;
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    // Spawn new ones periodically
+    if (spawnCount < maxSpawn && Math.random() < 0.3) {
+      tulips.push(new Tulip(false));
+      spawnCount++;
+    }
+    tulips.forEach((t,i) => {
+      t.update();
+      if (!t.offscreen()) t.draw();
+    });
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // Fade out after duration
+  setTimeout(() => {
+    canvas.style.opacity = '0';
+    setTimeout(() => {
+      running = false;
+      canvas._running = false;
+      ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    }, 1000);
+  }, duration);
+}
+
+// Fire tulip rain immediately when page loads (intro screen pe bhi dikh sakta hai)
+window.addEventListener('load', () => {
+  setTimeout(() => startTulipRain(7000), 400);
+});
+
+// Also fire again when shayari section enters viewport
+const tulipObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      const canvas = document.getElementById('tulipCanvas');
+      if (canvas) canvas._running = false; // allow restart
+      startTulipRain(6000);
+    }
+  });
+}, {threshold: 0.05});
+const shayariSection = document.getElementById('sec-shayari');
+if(shayariSection) tulipObserver.observe(shayariSection);
+
+// ─── SCROLLSPY UPDATE (add shayari) ───
+function setupScrollSpy() {
+  const homeEl = document.getElementById('s-home');
+  const sections = [
+    {id:'sec-home',link:'nl-home'},
+    {id:'sec-story',link:'nl-story'},
+    {id:'sec-memories',link:'nl-memories'},
+    {id:'sec-watchlist',link:'nl-watchlist'},
+    {id:'sec-chapters',link:'nl-chapters'},
+    {id:'sec-mygirl',link:'nl-mygirl'},
+    {id:'sec-shayari',link:'nl-shayari'},
+  ];
+  homeEl.addEventListener('scroll',()=>{
+    const scrollTop = homeEl.scrollTop+100;
+    let current = sections[0].link;
+    sections.forEach(s=>{const el=document.getElementById(s.id);if(el&&el.offsetTop<=scrollTop)current=s.link;});
+    document.querySelectorAll('.nf-links li').forEach(li=>li.classList.remove('active-link'));
+    const activeEl = document.getElementById(current);
+    if(activeEl) activeEl.classList.add('active-link');
+    document.getElementById('nfNav').classList.toggle('scrolled',homeEl.scrollTop>60);
+  });
+}
+
+// Letterbox intro
+setTimeout(()=>{document.getElementById('s-intro').classList.add('letterboxed')},100);
+</script>
+</body>
+</html>
